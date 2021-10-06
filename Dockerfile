@@ -6,7 +6,6 @@ EXPOSE 5000
 
 # Define environment variable
 ENV MODEL_NAME TestXGB
-ENV API_TYPE REST
 ENV SERVICE_TYPE MODEL
 
-CMD exec seldon-core-microservice $MODEL_NAME $API_TYPE --service-type $SERVICE_TYPE --persistence $PERSISTENCE
+CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE
