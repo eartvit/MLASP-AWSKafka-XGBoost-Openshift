@@ -10,4 +10,4 @@ ENV MODEL_NAME TestXGB
 ENV SERVICE_TYPE MODEL
 
 
-CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --http-port 32500
+CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --http-port 8080
