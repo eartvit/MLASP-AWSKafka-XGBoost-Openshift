@@ -2,7 +2,6 @@ import os
 import random
 from wtforms import SubmitField, StringField
 from flask_wtf import FlaskForm
-import joblib
 import numpy as np
 from flask import Flask, request, jsonify, session, url_for, render_template, redirect
 import requests
@@ -59,7 +58,12 @@ def generatePrediction(params):
     resp = None
     y_pred = -1
 
-    message = np.array(params).reshape(1, -1)  # reshape from list to numpy array usable by the Keras scaler.
+    message = {
+                "data": {
+                    "ndarray": [params]
+                }
+              }
+
     try:
         resp = requests.post(url=ml_service_endpoint, json=message, verify=False)
         logging.info(f"Processed request results: {resp}")
@@ -69,13 +73,13 @@ def generatePrediction(params):
         logging.error(f"Prediction service exception: {ex}")
 
     if results_OK:
-        y_pred = resp.json()
+        y_pred = resp.json()['data']['ndarray'][0]
+        print(f'Got prediction value {y_pred}')
 
     return y_pred
 
 
-def generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget, model, trainingScaler,
-                                  targetScaler):
+def generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget):
     """
     Searches for valid parameter combinations for a model within a given feature space, using a desired precision from
     the target prediction. The search is executed for a number of epochs.
@@ -94,12 +98,6 @@ def generateParameterCombinations(featureSpace, exceptionList, epochs, precision
         precision(float): The precision (absolute deviation percentage) of the predicted target from the search target.
         searchTarget(int): The desired prediction value of the model for which a set of features are searched.
          It can also be a floating point number.
-        model(model): The fully trained TF2 model loaded from an .h5 file.
-        trainingScaler(scaler): The fitted scaler used before training or evaluation on the input data before passing it
-         to the model. The scaler model is loaded from a pickle (.pkl) file.
-        targetScaler(scaler): The fitted scaler of the target for the inverse transformation of the predicted value to
-         the actual value that was used by the ML model during training and evaluation.
-         The scaler model is loaded from a pickle (.pkl) file.
         
     Returns:
         parameters(dict): A dictionary containing lists of values for eligible parameters falling within the search
@@ -171,8 +169,8 @@ def extractBestParameterCombination(parameterCombinations):
                 'MessageSize': parameters[pos][8]
                 }
     bestCombination = {'Parameters': paramMap,
-                       'Deviation': deviation[pos][0][0],
-                       'Prediction': float(predictions[pos][0][0])}
+                       'Deviation': deviation[pos],
+                       'Prediction': float(predictions[pos])}
     return bestCombination
 
 
@@ -268,15 +266,6 @@ def index():
         return redirect(url_for("prediction"))
     return render_template('home.html', form=form)
 
-##### !!!! Ensure the below files are in your folder ######
-'''
-    This exercise assumes an XGB Regression model.
-    Provide scalers initialization here if you change to a different model, and load the model as needed (e.g. from a h5 file using keras)
-'''
-ml_model = joblib.load("model.pkl")
-training_scaler = None
-target_scaler = None
-
 
 @app.route("/prediction")
 def prediction():
@@ -287,8 +276,7 @@ def prediction():
     precision = extractPrecision(session)
     searchTarget = extractSearchTarget(session)
 
-    parameterCombinations = generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget,
-                                                          ml_model, training_scaler, target_scaler)
+    parameterCombinations = generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget)
     if len(parameterCombinations.get("parameters")) == 0:
         print(f'No valid combination found for given limits and search target value and precision\n')
         # return "No valid combination found for given limits and search target value and precision"
@@ -310,8 +298,7 @@ def ml_predict():
     precision = extractPrecision(content)
     searchTarget = extractSearchTarget(content)
 
-    parameterCombinations = generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget,
-                                                          ml_model, training_scaler, target_scaler)
+    parameterCombinations = generateParameterCombinations(featureSpace, exceptionList, epochs, precision, searchTarget)
     if len(parameterCombinations.get("parameters")) == 0:
         print(f'No valid combination found for given limits and search target value and precision\n')
         return "No valid combination found for given limits and search target value and precision"
