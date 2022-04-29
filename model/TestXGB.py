@@ -7,9 +7,11 @@ class TestXGB(object):
     self.model = joblib.load("xgbModel.pkl")
 
 
-  def predict(self,X,features_names):
-    print(f'Got X={X} of type {type(X)}, df={pd.DataFrame(X).to_numpy()} \\n')
-    resp = self.model.predict(pd.DataFrame(X))
+  def predict(self, X, features_names):
+    print(f'Got X={X} of type {type(X)}, feature_names={features_names} \\n')
+    record = pd.DataFrame(X, columns=features_names)
+    print(f'Record is {record}')
+    resp = self.model.predict(record)
     return resp
 
 
