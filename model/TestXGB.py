@@ -18,8 +18,7 @@ class TestXGB(object):
 
   def metrics(self):
     return [
-      {"type": "COUNTER", "key": "mycounter", "value": 1}, # a counter which will increase by the given value
-      {"type": "GAUGE", "key": "mygauge", "value": 100},   # a gauge which will be set to given value
-      {"type": "TIMER", "key": "mytimer", "value": 20.2},  # a timer which will add sum and count metrics - assumed millisecs
+      {"type": "COUNTER", "key": "requests", "value": 1},
+      {"type": "TIMER", "key": "resptime", "value": 20.2},
     ]
   
