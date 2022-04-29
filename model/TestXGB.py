@@ -1,6 +1,6 @@
 import pandas as pd
 import joblib
-
+import xgboost as xgb
 
 class TestXGB(object):
   def __init__(self):
