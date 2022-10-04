@@ -1,4 +1,4 @@
-# test-seldon-s2i
+# MLASP on OpenShift crash course demo
 This repository is a basic example of ML Workloads on Red Hat OpenShift, reusing the data and model inference application from the [MLASP](https://github.com/SPEAR-SE/mlasp) research paper. Please keep in mind the code in this repository is just for demonstration purposes.
 
 Before starting, it is assumed you have access to an OpenShift cluster with the Open Data Hub operator installed and instantiated with Jupyter Hub, Prometheus and Grafana projects. The notebooks are supposed to be executed inside Jupyter Hub.
